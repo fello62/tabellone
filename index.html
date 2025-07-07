@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabellone Basket</title>
+<link href="bootstrap.css" rel="stylesheet">
+<style>
+body {
+ background-color: black;
+ color: white;
+ font-weight: bold;
+ text-align: center;
+ line-height: 1;}
+input, button {
+ color: black;}
+.squadre {
+ font-size: 4em;}
+.punti {
+ font-size: 10em;
+ color: yellow;}
+.quarto {
+ font-size: 8em;}
+.descr {
+ font-size: 2em;}
+.tempo {
+ font-size: 12em;}
+.rosso {
+ color: red;}
+.arancio {
+ color: orange;}
+.verde {
+ color: lime;}
+.magenta {
+ color: magenta;}
+.blu {
+ color: aqua;}
+</style>
+</head>
+<body>
+<div class="container">
+ <div id="aiuto" class="row">
+  <div class="col-xs-offset-2 col-xs-8" style="border: 2px solid blue;">
+   <div style="text-align: justify;">
+    <h3>AIUTO</h3>
+    <p>Questa semplice pagina web è nata dall'esigenza di emulare un
+    tabellone elettronico per Basket su un qualsiasi PC, tablet o
+    smartphone con la disponibilità di un browser.</p>
+    <p>Nel caso di un PC, si raccomanda l'uso del browser a schermo
+    intero, cosa di solito ottenibile tramite la pressione del tasto F11.</p>
+    <p>Si dovrebbe poi usufruire della possibilità di duplicare lo
+    schermo su dispositivi di maggiori dimensioni (tramite cavi HDMI,
+    trasmettitori radio HDMI, Chromecast, AppleTv, ecc.), per rendere
+    visibili i dati del tabellone a squadre e pubblico.</p>
+    <h3>Istruzioni per l'uso</h3>
+    <ul>
+     <li>Tasto "i" oppure click sul nome della squadra A (solitamente
+     "CASA"): per accedere alle impostazioni con cui cambiare i nomi
+     delle squadre, resettare punteggi, periodo, timeout e falli,
+     impostare il cronometro. Questo tasto ferma il cronometro.</li>
+     <li>Tasto "b" oppure click sul nome della squadra B (solitamente
+     "OSPITI"): emissione del suono del buzzer del cronometrista. Questo
+     tasto ferma il cronometro.</li>
+     <li>Tasti "qwe": per aumentare il conteggio della prima riga di dati
+     dello schermo (PuntiA, Periodo, Punti B). Usando il maiuscolo il
+     conteggio viene diminuito.</li>
+     <li>Tasti "asdf": per aumentare il conteggio della seconda riga di
+     dati dello schermo (TimeoutA, FalliA, FalliB, TimeoutB). Usando il
+     maiuscolo il conteggio viene diminuito.</li>
+     <li>Tasto Invio: avvio del cronometro.</li>
+     <li>Tasto Barra-Spaziatrice: arresto del cronometro.</li>
+    </ul>
+    <p>Cliccando sul tempo si accende o spegne il
+    cronometro in modo alternato.</p>
+    <p>Cliccando punti, periodo, timeout o falli, se ne aumenta il
+    conteggio; per diminuirlo occorre un click prolungato ad almeno mezzo
+    secondo.</p>
+   </div>
+   <button id="btnaiuto" type="button">Chiudi Aiuto</button>
+  </div>
+ </div>
+
+ <div id="impost" class="row hidden">
+
+  <div class="col-xs-12">
+   Squadra A
+   <input type="text" id="sqa" value="CASA" onblur="maiusc(this);">
+   Squadra B
+   <input type="text" id="sqb" value="OSPITI" onblur="maiusc(this);">
+   <br>
+   <button id="btnpe" type="button">Reset Periodo</button>
+   <button id="btnpu" type="button">Reset Punti</button>
+   <button id="btnto" type="button">Reset Timeout</button>
+   <button id="btnfa" type="button">Reset Falli</button>
+   <br>
+   Minuti
+   <input type="text" id="min" value="0" onblur="ctrlnumero(this,0,99);">
+   Secondi
+   <input type="text" id="sec" value="0" onblur="ctrlnumero(this,0,59);">
+   Decimi
+   <input type="text" id="dec" value="0" onblur="ctrlnumero(this,0,9);">
+   <br>
+   <button id="btnchiudi" type="button">Chiudi e Salva</button>
+  </div>
+ </div>
+
+ <div class="row">
+  <div class="col-xs-5 clickable" data-key="i">
+   <span id="squadraa" class="squadre">CASA</span>
+  </div>
+  <div class="col-xs-2">
+  </div>
+  <div class="col-xs-5 clickable" data-key="b">
+   <span id="squadrab" class="squadre">OSPITI</span>
+  </div>
+ </div>
+
+ <div class="row">
+  <div class="col-xs-5 pressable" data-key="q">
+   <span id="puntia" class="punti"></span>
+  </div>
+  <div class="col-xs-2 pressable" data-key="w">
+   <div class="descr">PERIODO</div>
+   <div id="periodo" class="quarto magenta"></div>
+  </div>
+  <div class="col-xs-5 pressable" data-key="e">
+   <span id="puntib" class="punti"></span>
+  </div>
+ </div>
+
+ <div class="row">
+  <div class="col-xs-3 pressable" data-key="a">
+   <span class="descr">TIMEOUT</span><br>
+   <span id="timeouta" class="quarto blu">&bull; &bull; &bull;</span>
+  </div>
+  <div class="col-xs-2 pressable" data-key="s">
+   <span class="descr">FALLI</span><br>
+   <span id="fallia" class="quarto rosso"></span>
+  </div>
+  <div class="col-xs-2">
+  </div>
+  <div class="col-xs-2 pressable" data-key="d">
+   <span class="descr">FALLI</span><br>
+   <span id="fallib" class="quarto rosso"></span>
+  </div>
+  <div class="col-xs-3 pressable" data-key="f">
+   <span class="descr">TIMEOUT</span><br>
+   <span id="timeoutb" class="quarto blu">&bull; &bull; &bull;</span>
+  </div>
+ </div>
+
+ <div class="row">
+  <div class="col-xs-6 col-xs-offset-3 clickable" data-key=" ">
+   <span id="crono" class="tempo arancio">20:00</span>
+  </div>
+ </div>
+
+</div>
+<audio preload="auto">
+ <source src="buzzer.ogg" type="audio/ogg">
+ <source src="buzzer.mp3" type="audio/mpeg">
+ <source src="buzzer.m4a" type="audio/mp4">
+</audio>
+<script src="jquery.min.js"></script>
+<script>
+<!--
+var tb={
+ sq:['CASA','OSPITI'],
+ mm:20,
+ ss:0,
+ dd:0,
+ periodo:0,
+ punti:[0,0],
+ to:[0,0],
+ falli:[0,0]};
+var acceso=false,audio=$('audio')[0],tempo='',tt=$('#crono');
+var dn,intervallo,presstime,pressval;
+
+tt.text(tempo);
+loadtb();
+aggdati();
+
+$('#btnpe').click(function(){
+ tb.periodo=0;
+ setpe();
+});
+$('#btnpu').click(function(){
+ tb.punti[0]=tb.punti[1]=0;
+ setpu(0);
+ setpu(1);
+});
+$('#btnto').click(function(){
+ tb.to[0]=tb.to[1]=0;
+ setto(0);
+ setto(1);
+});
+$('#btnfa').click(function(){
+ tb.falli[0]=tb.falli[1]=0;
+ setfa(0);
+ setfa(1);
+});
+
+$('#btnchiudi').click(function(){
+ maiusc($('#sqa')[0]);
+ tb.sq[0]=$('#sqa').val();
+ maiusc($('#sqb')[0]);
+ tb.sq[1]=$('#sqb').val();
+ ctrlnumero($('#min')[0],0,99);
+ tb.mm=1*$('#min').val();
+ ctrlnumero($('#min')[0],0,59);
+ tb.ss=1*$('#sec').val();
+ ctrlnumero($('#min')[0],0,9);
+ tb.dd=1*$('#dec').val();
+ $('#impost').addClass('hidden');
+ savetb();
+ aggdati();
+});
+
+$('#btnaiuto').click(function(){
+ $('#aiuto').addClass('hidden');
+});
+
+$('.clickable').click(function(ev){
+ var k=$(this).data('key').charCodeAt(0);
+ if (k==32) k=acceso?32:13;
+ tasti(k,0);
+});
+
+$('.pressable')
+.on('mousedown',function(event){
+ event.stopPropagation();
+ press();
+ return false;
+})
+.on('touchstart',function(event){
+ event.stopPropagation();
+ var ev=event.originalEvent;
+ if (ev.touches.length>1)
+  return false;
+ press();
+ return false;
+})
+.on('mouseup',function(event){
+ clearTimeout(presstime);
+ event.stopPropagation();
+ unpress($(this).data('key').charCodeAt(0));
+ return false;
+})
+.on('touchend',function(event){
+ clearTimeout(presstime);
+ event.stopPropagation();
+ var ev=event.originalEvent;
+ if (ev.changedTouches.length>1)
+  return false;
+ unpress($(this).data('key').charCodeAt(0));
+ return false;
+});
+
+function aggdati(){
+ acceso=false;
+ setsq(0);
+ setsq(1);
+ setpu(0);
+ setpu(1);
+ setpe();
+ setto(0);
+ setto(1);
+ setfa(0);
+ setfa(1);
+ sette();
+ $('#crono').addClass('arancio').removeClass('verde');
+ $('body').on('keypress',function(ev){pretasti(ev);});
+}
+
+function ctrlnumero(o,minimo,massimo){
+ var s=o.value;
+ var r=parseInt(s,10)||0;
+ if (r<minimo) r=minimo;
+ if (r>massimo) r=massimo;
+ o.value=r;
+ return true;
+}
+
+function iv(){
+ var d,t;
+ if (!acceso) return;
+ d=Date.now();
+ do {
+  dn+=100;
+  tb.dd--;
+  if ((tb.dd|tb.ss|tb.mm)==0) break;
+  if (tb.dd<0){
+   tb.dd=9;
+   tb.ss--;
+   if (tb.ss<0){
+    tb.ss=59;
+    tb.mm--;
+   }
+  }
+ } while (d-dn>50);//corregge se il ritardo supera mezzo decimo
+ sette();
+ if ((tb.dd|tb.ss|tb.mm)==0){
+  acceso=false;
+  audio.play();
+  tasti(32,0);
+ }
+ savetb();
+}
+
+function loadtb(){
+ if (localStorage.tb) tb=JSON.parse(localStorage.tb);
+ else savetb();
+}
+
+function maiusc(o){
+ var s=trim(o.value);
+ o.value=s.toUpperCase();
+ return true;
+}
+
+function press(){
+ pressval=1;
+ presstime=setTimeout(function(){
+  pressval=-1;
+ },500);
+}
+
+function pretasti(ev){
+ ev.preventDefault();
+ var k=ev.which,m;
+ m=(k>96)?1:-1;
+ tasti(k,m);
+}
+
+function savetb(){
+ setTimeout(function(){
+  localStorage.tb=JSON.stringify(tb);
+ },0);
+}
+
+function setfa(i){
+ tb.falli[i]=tb.falli[i]<0?0:tb.falli[i]>5?5:tb.falli[i];
+ $('#falli'+('ab'.charAt(i))).text(tb.falli[i]);
+}
+
+function setpe(){
+ tb.periodo=tb.periodo<0?0:tb.periodo>9?9:tb.periodo;
+ $('#periodo').text(tb.periodo);
+}
+
+function setpu(i){
+ tb.punti[i]=tb.punti[i]<0?0:tb.punti[i]>999?999:tb.punti[i];
+ $('#punti'+('ab'.charAt(i))).text(tb.punti[i]);
+}
+
+function setsq(i){
+ if (tb.sq[i].length>0)
+  $('#squadra'+('ab'.charAt(i))).text(tb.sq[i]);
+ else
+  $('#squadra'+('ab'.charAt(i))).html('&nbsp;'); 
+}
+
+function sette(){
+ var t;
+ t=tb.mm>0?tb.mm+':'+('0'+tb.ss).slice(-2):('0'+tb.ss).slice(-2)+'.'+tb.dd;
+ if (t!=tempo){
+  tempo=t;
+  tt.text(tempo);
+ }
+}
+
+function setto(i){
+ tb.to[i]=tb.to[i]<0?0:tb.to[i]>3?3:tb.to[i];
+ $('#timeout'+('ab'.charAt(i))).html('&bull;&bull;&bull;&nbsp;'.slice(-(tb.to[i]+1)*6,(tb.to[i]==0?24:18)));
+}
+
+function tasti(k,m){
+ var i;
+ switch(k){
+  case 13://invio
+   if ((tb.dd|tb.ss|tb.mm)!=0){
+    acceso=true;
+    dn=Date.now();
+    intervallo=setInterval(function(){iv();},100);
+    $('#crono').removeClass('arancio').addClass('verde');
+   }
+   break;
+  case 32://spazio
+   acceso=false;
+   clearInterval(intervallo);
+   $('#crono').addClass('arancio').removeClass('verde');
+   break;
+  case 113://q
+  case 81://Q
+  case 101://e
+  case 69://E
+   i=(k|32)==101?1:0;
+   tb.punti[i]+=m;
+   setpu(i);
+   break;
+  case 119://w
+  case 87://W
+   tb.periodo+=m;
+   setpe();
+   break;
+  case 97://a
+  case 65://A
+  case 102://f
+  case 70://F
+   i=(k|32)==102?1:0;
+   tb.to[i]+=m;
+   setto(i);
+   break;
+  case 115://s
+  case 83://S
+  case 100://d
+  case 68://D
+   i=(k|32)==100?1:0;
+   tb.falli[i]+=m;
+   setfa(i);
+   break;
+  case 105://i
+   acceso=false;
+   clearInterval(intervallo);
+   $('#crono').addClass('arancio').removeClass('verde');
+   $('#impost').removeClass('hidden');
+   $('body').off('keypress');
+   $('#sqa').val(tb.sq[0]);
+   $('#sqb').val(tb.sq[1]);
+   $('#min').val(tb.mm);
+   $('#sec').val(tb.ss);
+   $('#dec').val(tb.dd);
+   break;
+  case 98://b
+   acceso=false;
+   clearInterval(intervallo);
+   audio.play();
+   $('#crono').addClass('arancio').removeClass('verde');
+   break;
+ }
+ savetb();
+}
+
+function trim(stringToTrim){
+ return stringToTrim.replace(/^\s+|\s+$/g,"");
+}
+
+function unpress(k){
+ clearTimeout(presstime);
+ tasti(k,pressval);
+}
+-->
+</script>
+</body>
+</html>
