@@ -62,7 +62,7 @@ input, button {
      "OSPITI"): emissione del suono del buzzer del cronometrista. Questo
      tasto ferma il cronometro.</li>
      <li>Tasti "qwe": per aumentare il conteggio della prima riga di dati
-     dello schermo (PuntiA, Periodo, PuntiB). Usando il maiuscolo il
+     dello schermo (PuntiA, Periodo, Punti B). Usando il maiuscolo il
      conteggio viene diminuito.</li>
      <li>Tasti "asdf": per aumentare il conteggio della seconda riga di
      dati dello schermo (TimeoutA, FalliA, FalliB, TimeoutB). Usando il
@@ -174,7 +174,7 @@ var tb={
  to:[0,0],
  falli:[0,0]};
 var acceso=false,audio=$('audio')[0],tempo='',tt=$('#crono');
-var dn,intervallo,presstime,pressval;
+var df,dn,intervallo,presstime,pressval;
 
 tt.text(tempo);
 loadtb();
@@ -258,6 +258,7 @@ $('.pressable')
 
 function aggdati(){
  acceso=false;
+ df=0;
  setsq(0);
  setsq(1);
  setpu(0);
@@ -282,11 +283,12 @@ function ctrlnumero(o,minimo,massimo){
 }
 
 function iv(){
- var d,t;
+ var d;
  if (!acceso) return;
  d=Date.now();
  do {
   dn+=100;
+  df=d-dn;
   tb.dd--;
   if ((tb.dd|tb.ss|tb.mm)==0) break;
   if (tb.dd<0){
@@ -297,7 +299,7 @@ function iv(){
     tb.mm--;
    }
   }
- } while (d-dn>50);//corregge se il ritardo supera mezzo decimo
+ } while (df>50);//corregge se il ritardo supera mezzo decimo
  sette();
  if ((tb.dd|tb.ss|tb.mm)==0){
   acceso=false;
@@ -380,14 +382,17 @@ function tasti(k,m){
   case 13://invio
    if ((tb.dd|tb.ss|tb.mm)!=0){
     acceso=true;
-    dn=Date.now();
+    i=Date.now();
+    dn=i-df;
     intervallo=setInterval(function(){iv();},100);
     $('#crono').removeClass('arancio').addClass('verde');
    }
    break;
   case 32://spazio
    acceso=false;
+   i=Date.now();
    clearInterval(intervallo);
+   df=i-dn;
    $('#crono').addClass('arancio').removeClass('verde');
    break;
   case 113://q
