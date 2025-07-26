@@ -54,27 +54,29 @@ input, button {
     visibili i dati del tabellone a squadre e pubblico.</p>
     <h3>Istruzioni per l'uso</h3>
     <ul>
-     <li>Tasto "i" oppure click sul nome della squadra A (solitamente
-     "CASA"): per accedere alle impostazioni con cui cambiare i nomi
-     delle squadre, resettare punteggi, periodo, timeout e falli,
-     impostare il cronometro. Questo tasto ferma il cronometro.</li>
+     <li>Tasto "I" maiuscolo oppure click sul nome della squadra A
+     (solitamente "CASA"): per accedere alle impostazioni con cui
+     cambiare i nomi delle squadre, resettare punteggi, periodo, timeout
+     e falli, impostare il cronometro. Questo tasto ferma il
+     cronometro.</li>
      <li>Tasto "b" oppure click sul nome della squadra B (solitamente
      "OSPITI"): emissione del suono del buzzer del cronometrista. Questo
-     tasto ferma il cronometro.</li>
-     <li>Tasti "qwe": per aumentare il conteggio della prima riga di dati
-     dello schermo (PuntiA, Periodo, Punti B). Usando il maiuscolo il
-     conteggio viene diminuito.</li>
+     tasto NON ferma il cronometro, come richiesto dal Regolamento
+     Tecnico.</li>
+     <li>Tasti "qwe": per aumentare il conteggio della prima riga di
+     dati dello schermo (PuntiA, Periodo, PuntiB). Usando il maiuscolo
+     il conteggio viene diminuito.</li>
      <li>Tasti "asdf": per aumentare il conteggio della seconda riga di
      dati dello schermo (TimeoutA, FalliA, FalliB, TimeoutB). Usando il
      maiuscolo il conteggio viene diminuito.</li>
      <li>Tasto Invio: avvio del cronometro.</li>
      <li>Tasto Barra-Spaziatrice: arresto del cronometro.</li>
     </ul>
-    <p>Cliccando sul tempo si accende o spegne il
-    cronometro in modo alternato.</p>
+    <p>Cliccando sul tempo si accende o spegne il cronometro in modo
+    alternato.</p>
     <p>Cliccando punti, periodo, timeout o falli, se ne aumenta il
-    conteggio; per diminuirlo occorre un click prolungato ad almeno mezzo
-    secondo.</p>
+    conteggio; per diminuirlo occorre un click prolungato ad almeno
+    mezzo secondo.</p>
    </div>
    <button id="btnaiuto" type="button">Chiudi Aiuto</button>
   </div>
@@ -93,6 +95,12 @@ input, button {
    <button id="btnto" type="button">Reset Timeout</button>
    <button id="btnfa" type="button">Reset Falli</button>
    <br>
+   <button class="itempo" type="button" data-key="20">Reset 20'</button>
+   <button class="itempo" type="button" data-key="15">Reset 15'</button>
+   <button class="itempo" type="button" data-key="10">Reset 10'</button>
+   <button class="itempo" type="button" data-key="5">Reset 5'</button>
+   <button class="itempo" type="button" data-key="2">Reset 2'</button>
+   <br>
    Minuti
    <input type="text" id="min" value="0" onblur="ctrlnumero(this,0,99);">
    Secondi
@@ -105,7 +113,7 @@ input, button {
  </div>
 
  <div class="row">
-  <div class="col-xs-5 clickable" data-key="i">
+  <div class="col-xs-5 clickable" data-key="I">
    <span id="squadraa" class="squadre">CASA</span>
   </div>
   <div class="col-xs-2">
@@ -174,7 +182,7 @@ var tb={
  to:[0,0],
  falli:[0,0]};
 var acceso=false,audio=$('audio')[0],tempo='',tt=$('#crono');
-var df,dn,intervallo,presstime,pressval;
+var dn,intervallo,presstime,pressval,tr;
 
 tt.text(tempo);
 loadtb();
@@ -200,20 +208,15 @@ $('#btnfa').click(function(){
  setfa(1);
 });
 
+$('.itempo').click(function(){
+ var k=$(this).data('key');
+ $('#min').val(k);
+ $('#sec').val(0);
+ $('#dec').val(0);
+});
+
 $('#btnchiudi').click(function(){
- maiusc($('#sqa')[0]);
- tb.sq[0]=$('#sqa').val();
- maiusc($('#sqb')[0]);
- tb.sq[1]=$('#sqb').val();
- ctrlnumero($('#min')[0],0,99);
- tb.mm=1*$('#min').val();
- ctrlnumero($('#min')[0],0,59);
- tb.ss=1*$('#sec').val();
- ctrlnumero($('#min')[0],0,9);
- tb.dd=1*$('#dec').val();
- $('#impost').addClass('hidden');
- savetb();
- aggdati();
+ finei();
 });
 
 $('#btnaiuto').click(function(){
@@ -258,7 +261,6 @@ $('.pressable')
 
 function aggdati(){
  acceso=false;
- df=0;
  setsq(0);
  setsq(1);
  setpu(0);
@@ -271,6 +273,7 @@ function aggdati(){
  sette();
  $('#crono').addClass('arancio').removeClass('verde');
  $('body').on('keypress',function(ev){pretasti(ev);});
+ tr=tb.mm*60000+tb.ss*1000+tb.dd*100;
 }
 
 function ctrlnumero(o,minimo,massimo){
@@ -282,31 +285,41 @@ function ctrlnumero(o,minimo,massimo){
  return true;
 }
 
+function finei(){
+ maiusc($('#sqa')[0]);
+ tb.sq[0]=$('#sqa').val();
+ maiusc($('#sqb')[0]);
+ tb.sq[1]=$('#sqb').val();
+ ctrlnumero($('#min')[0],0,99);
+ tb.mm=1*$('#min').val();
+ ctrlnumero($('#min')[0],0,59);
+ tb.ss=1*$('#sec').val();
+ ctrlnumero($('#min')[0],0,9);
+ tb.dd=1*$('#dec').val();
+ $('#impost').addClass('hidden');
+ savetb();
+ aggdati();
+}
+
 function iv(){
- var d;
+ var i;
  if (!acceso) return;
- d=Date.now();
- do {
-  dn+=100;
-  df=d-dn;
-  tb.dd--;
-  if ((tb.dd|tb.ss|tb.mm)==0) break;
-  if (tb.dd<0){
-   tb.dd=9;
-   tb.ss--;
-   if (tb.ss<0){
-    tb.ss=59;
-    tb.mm--;
-   }
-  }
- } while (df>50);//corregge se il ritardo supera mezzo decimo
- sette();
- if ((tb.dd|tb.ss|tb.mm)==0){
-  acceso=false;
+ i=Date.now();
+ tr+=dn-i;
+ dn=i;
+ if (tr>0){
+  tb.mm=Math.floor(tr/60000);
+  tb.ss=Math.floor((tr%60000)/1000);
+  tb.dd=Math.floor((tr%1000)/100);
+ } else {
+  tb.mm=tb.ss=tb.dd=0;
   audio.play();
   tasti(32,0);
  }
- savetb();
+ setTimeout(function(){
+  sette();
+  savetb();
+ },0);
 }
 
 function loadtb(){
@@ -359,12 +372,11 @@ function setsq(i){
  if (tb.sq[i].length>0)
   $('#squadra'+('ab'.charAt(i))).text(tb.sq[i]);
  else
-  $('#squadra'+('ab'.charAt(i))).html('&nbsp;'); 
+  $('#squadra'+('ab'.charAt(i))).html('&nbsp;');
 }
 
 function sette(){
- var t;
- t=tb.mm>0?tb.mm+':'+('0'+tb.ss).slice(-2):('0'+tb.ss).slice(-2)+'.'+tb.dd;
+ var t=tb.mm>0?tb.mm+':'+('0'+tb.ss).slice(-2):('0'+tb.ss).slice(-2)+'.'+tb.dd;
  if (t!=tempo){
   tempo=t;
   tt.text(tempo);
@@ -380,20 +392,21 @@ function tasti(k,m){
  var i;
  switch(k){
   case 13://invio
-   if ((tb.dd|tb.ss|tb.mm)!=0){
+   if ((!acceso)&&((tb.dd|tb.ss|tb.mm)!=0)){
     acceso=true;
-    i=Date.now();
-    dn=i-df;
+    dn=Date.now();
     intervallo=setInterval(function(){iv();},100);
     $('#crono').removeClass('arancio').addClass('verde');
    }
    break;
   case 32://spazio
-   acceso=false;
-   i=Date.now();
-   clearInterval(intervallo);
-   df=i-dn;
-   $('#crono').addClass('arancio').removeClass('verde');
+   if (acceso){
+    acceso=false;
+    i=Date.now();
+    tr+=dn-i;
+    clearInterval(intervallo);
+    $('#crono').addClass('arancio').removeClass('verde');
+   }
    break;
   case 113://q
   case 81://Q
@@ -424,9 +437,13 @@ function tasti(k,m){
    tb.falli[i]+=m;
    setfa(i);
    break;
-  case 105://i
-   acceso=false;
-   clearInterval(intervallo);
+  case 73://I
+   if (acceso){
+    acceso=false;
+    i=Date.now();
+    tr+=dn-i;
+    clearInterval(intervallo);
+   }
    $('#crono').addClass('arancio').removeClass('verde');
    $('#impost').removeClass('hidden');
    $('body').off('keypress');
@@ -437,10 +454,7 @@ function tasti(k,m){
    $('#dec').val(tb.dd);
    break;
   case 98://b
-   acceso=false;
-   clearInterval(intervallo);
    audio.play();
-   $('#crono').addClass('arancio').removeClass('verde');
    break;
  }
  savetb();
