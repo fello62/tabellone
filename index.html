@@ -311,6 +311,10 @@ function iv(){
   tb.mm=Math.floor(tr/60000);
   tb.ss=Math.floor((tr%60000)/1000);
   tb.dd=Math.floor((tr%1000)/100);
+  if (((tb.mm|tb.ss)==0)&&(tb.dd<=1)){
+   clearInterval(intervallo);
+   intervallo=setInterval(function(){iv();},tr);
+  }
  } else {
   tb.mm=tb.ss=tb.dd=0;
   audio.play();
